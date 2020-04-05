@@ -1,0 +1,81 @@
+class /ONS/EASY_LOG_DISPLAY definition
+  public
+  inheriting from /ONS/CL_EASY_COCKPIT_FUNCTION
+  create public .
+
+public section.
+
+  methods CONSTRUCTOR .
+  methods SET_LOG
+    importing
+      !I_LOG_REF type ref to /ONS/EASY_LOG optional
+      !I_LOG_NUMBER type BALOGNR optional .
+
+  methods FREE
+    redefinition .
+  methods START
+    redefinition .
+protected section.
+private section.
+
+  data W_LOG type ref to /ONS/EASY_LOG .
+ENDCLASS.
+
+
+
+CLASS /ONS/EASY_LOG_DISPLAY IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG_DISPLAY->CONSTRUCTOR
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method CONSTRUCTOR.
+
+  super->constructor( ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG_DISPLAY->FREE
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method FREE.
+
+  if w_log is bound.
+    w_log->free( ).
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG_DISPLAY->SET_LOG
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LOG_REF                      TYPE REF TO /ONS/EASY_LOG(optional)
+* | [--->] I_LOG_NUMBER                   TYPE        BALOGNR(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method SET_LOG.
+
+  if i_log_ref is supplied and i_log_ref is bound.
+    w_log = i_log_ref.
+  elseif not i_log_number is initial.
+    create object w_log exporting i_log_number = i_log_number.
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG_DISPLAY->START
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method START.
+
+  if w_log is bound.
+    w_log->display( exporting i_container = w_container ).
+  endif.
+
+endmethod.
+ENDCLASS.
