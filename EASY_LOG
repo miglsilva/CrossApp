@@ -1,0 +1,748 @@
+class /ONS/EASY_LOG definition
+  public
+  create public .
+
+public section.
+  type-pools ABAP .
+
+  class-data W_ID type BAPIRET2-ID value '/ONS/CA'. "#EC NOTEXT .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . " .
+  class-data W_NUMBER type BAPIRET2-NUMBER value '000'. "#EC NOTEXT .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . " .
+  class-data W_LEVEL type BAL_S_MSG-DETLEVEL value '1'. "#EC NOTEXT .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . " .
+  class-data W_TYPE type BAPIRET2-TYPE value 'I'. "#EC NOTEXT .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . " .
+
+  methods FREE .
+  methods GET_DISPLAY_PROFILE
+    returning
+      value(R_DISPLAY_PROFILE) type BAL_S_PROF .
+  methods SET_LEVEL_INFO
+    importing
+      !I_LEVEL type BALLEVEL
+      !I_STRUCTURE type BALTABNAME .
+  methods CONSTRUCTOR
+    importing
+      !I_LOG_OBJECT type BALOBJ_D optional
+      !I_LOG_SUBOBJECT type BALSUBOBJ optional
+      !I_LOG_EXTNUMBER type ANY optional
+      !I_LOG_NUMBER type BALOGNR optional
+      !I_LOG_HANDLE type BALLOGHNDL optional
+      !I_ID type BAPIRET2-ID optional
+      !I_NUMBER type BAPIRET2-NUMBER optional
+      !I_TYPE type BAPIRET2-TYPE optional
+      !I_LEVEL type BAL_S_MSG-DETLEVEL optional
+      !I_STRUCTURE type BALTABNAME optional
+      !I_ALTERNATE type BOOLE_D optional .
+  methods ADD_INFO
+    importing
+      !I_LEVEL type BAL_S_MSG-DETLEVEL default W_LEVEL
+      !I_ID type BAPIRET2-ID default W_ID
+      !I_NUMBER type BAPIRET2-NUMBER default W_NUMBER
+      !I_MESSAGE type ANY optional
+      !I_PAR1 type ANY optional
+      !I_PAR2 type ANY optional
+      !I_PAR3 type ANY optional
+      !I_PAR4 type ANY optional
+      !I_VALUE type ANY optional .
+  methods ADD_WARNING
+    importing
+      !I_LEVEL type BAL_S_MSG-DETLEVEL default W_LEVEL
+      !I_ID type BAPIRET2-ID default W_ID
+      !I_NUMBER type BAPIRET2-NUMBER default W_NUMBER
+      !I_MESSAGE type ANY optional
+      !I_PAR1 type ANY optional
+      !I_PAR2 type ANY optional
+      !I_PAR3 type ANY optional
+      !I_PAR4 type ANY optional
+      !I_VALUE type ANY optional .
+  methods ADD_ERROR
+    importing
+      !I_LEVEL type BAL_S_MSG-DETLEVEL default W_LEVEL
+      !I_ID type BAPIRET2-ID default W_ID
+      !I_NUMBER type BAPIRET2-NUMBER default W_NUMBER
+      !I_MESSAGE type ANY optional
+      !I_PAR1 type ANY optional
+      !I_PAR2 type ANY optional
+      !I_PAR3 type ANY optional
+      !I_PAR4 type ANY optional
+      !I_VALUE type ANY optional .
+  methods ADD_MESSAGE
+    importing
+      !I_TYPE type BAPIRET2-TYPE default W_TYPE
+      !I_LEVEL type BAL_S_MSG-DETLEVEL default W_LEVEL
+      !I_ID type BAPIRET2-ID default W_ID
+      !I_NUMBER type BAPIRET2-NUMBER default W_NUMBER
+      !I_MESSAGE type ANY optional
+      !I_PAR1 type ANY optional
+      !I_PAR2 type ANY optional
+      !I_PAR3 type ANY optional
+      !I_PAR4 type ANY optional
+      !I_VALUE type ANY optional .
+  methods SAVE
+    returning
+      value(R_LOG_NUMBER) type BALOGNR .
+  methods DISPLAY
+    importing
+      !I_CONTAINER type ref to CL_GUI_CONTAINER optional
+      !I_AS_POPUP type BOOLE_D optional
+      !I_START_COL type BALCOORD default 1
+      !I_START_ROW type BALCOORD default 1
+      !I_END_COL type BALCOORD default 120
+      !I_END_ROW type BALCOORD default 20 .
+  methods GET_LOG_NUMBER
+    returning
+      value(R_LOG_NUMBER) type BALOGNR .
+  methods ADD_MESSAGE_TABLE
+    importing
+      !I_LEVEL type BAL_S_MSG-DETLEVEL default W_LEVEL
+      !I_VALUE type ANY optional
+      !IT_MESSAGES type BAPIRET2_TAB .
+  methods SET_DISPLAY_PROFILE
+    importing
+      !I_DISPLAY_PROFILE type BAL_S_PROF .
+protected section.
+
+  data W_ALTERNATE_LOG type BOOLE_D .
+  data W_LOG_NUMBER type BALOGNR .
+  data W_LOG_HANDLE type BALLOGHNDL .
+  data W_LOG_EXTNUMBER type BALNREXT .
+  data W_LOG_OBJECT type BALOBJ_D .
+  data W_LOG_SUBOBJECT type BALSUBOBJ .
+  data WT_LEVEL_INFO type /ONS/EASY_LOG_T_LVL .
+  data W_DISPLAY_PROFILE type BAL_S_PROF .
+  data W_CONTROL_HANDLE type BALCNTHNDL .
+
+  methods LOAD
+    importing
+      !I_LOG_NUMBER type BALOGNR optional
+      !I_LOG_HANDLE type BALLOGHNDL optional
+      !I_LOG_EXTNUMBER type ANY optional .
+private section.
+
+  methods START_DISPLAY_PROFILE .
+ENDCLASS.
+
+
+
+CLASS /ONS/EASY_LOG IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->ADD_ERROR
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL (default =W_LEVEL)
+* | [--->] I_ID                           TYPE        BAPIRET2-ID (default =W_ID)
+* | [--->] I_NUMBER                       TYPE        BAPIRET2-NUMBER (default =W_NUMBER)
+* | [--->] I_MESSAGE                      TYPE        ANY(optional)
+* | [--->] I_PAR1                         TYPE        ANY(optional)
+* | [--->] I_PAR2                         TYPE        ANY(optional)
+* | [--->] I_PAR3                         TYPE        ANY(optional)
+* | [--->] I_PAR4                         TYPE        ANY(optional)
+* | [--->] I_VALUE                        TYPE        ANY(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method ADD_ERROR.
+
+  add_message( i_type    = 'E'
+               i_level   = i_level
+               i_id      = i_id
+               i_number  = i_number
+               i_message = i_message
+               i_par1    = i_par1
+               i_par2    = i_par2
+               i_par3    = i_par3
+               i_par4    = i_par4 ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->ADD_INFO
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL (default =W_LEVEL)
+* | [--->] I_ID                           TYPE        BAPIRET2-ID (default =W_ID)
+* | [--->] I_NUMBER                       TYPE        BAPIRET2-NUMBER (default =W_NUMBER)
+* | [--->] I_MESSAGE                      TYPE        ANY(optional)
+* | [--->] I_PAR1                         TYPE        ANY(optional)
+* | [--->] I_PAR2                         TYPE        ANY(optional)
+* | [--->] I_PAR3                         TYPE        ANY(optional)
+* | [--->] I_PAR4                         TYPE        ANY(optional)
+* | [--->] I_VALUE                        TYPE        ANY(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method ADD_INFO.
+
+  add_message( i_type    = 'I'
+               i_level   = i_level
+               i_id      = i_id
+               i_number  = i_number
+               i_message = i_message
+               i_par1    = i_par1
+               i_par2    = i_par2
+               i_par3    = i_par3
+               i_par4    = i_par4 ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->ADD_MESSAGE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_TYPE                         TYPE        BAPIRET2-TYPE (default =W_TYPE)
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL (default =W_LEVEL)
+* | [--->] I_ID                           TYPE        BAPIRET2-ID (default =W_ID)
+* | [--->] I_NUMBER                       TYPE        BAPIRET2-NUMBER (default =W_NUMBER)
+* | [--->] I_MESSAGE                      TYPE        ANY(optional)
+* | [--->] I_PAR1                         TYPE        ANY(optional)
+* | [--->] I_PAR2                         TYPE        ANY(optional)
+* | [--->] I_PAR3                         TYPE        ANY(optional)
+* | [--->] I_PAR4                         TYPE        ANY(optional)
+* | [--->] I_VALUE                        TYPE        ANY(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method ADD_MESSAGE.
+
+data: begin of l_data,
+        message      type bal_s_msg,
+        handle       type balmsghndl,
+        logged       type boolean,
+        displayed    type boolean,
+        msg_defaults type bal_s_mdef,
+        string       type string,
+        o_structure  type ref to cl_abap_structdescr,
+        t_fields     type cl_abap_structdescr=>component_table,
+        structure    type ref to data,
+      end of l_data.
+
+field-symbols: <l_level_info> like line of wt_level_info,
+               <l_structure>  type any,
+               <l_field>      like line of l_data-t_fields.
+
+  free: l_data. clear: l_data.
+
+  l_data-message-msgty    = i_type.
+  l_data-message-msgid    = i_id.
+  l_data-message-msgno    = i_number.
+  l_data-message-msgv1    = i_par1.
+  l_data-message-msgv2    = i_par2.
+  l_data-message-msgv3    = i_par3.
+  l_data-message-msgv4    = i_par4.
+  l_data-message-detlevel = i_level.
+
+  if not wt_level_info is initial.
+    read table wt_level_info assigning <l_level_info> with key detlevel = i_level.
+
+    call function 'BAL_GLB_MSG_DEFAULTS_GET'
+        importing  e_s_msg_defaults = l_data-msg_defaults
+        exceptions others           = 99.
+    if not i_value is initial and <l_level_info> is assigned.
+      l_data-msg_defaults-detlevel        = i_level.
+      l_data-msg_defaults-context-tabname = <l_level_info>-tabname.
+      if i_value is supplied and not i_value is initial.
+
+        l_data-o_structure ?= cl_abap_structdescr=>describe_by_data( i_value ).
+        if l_data-o_structure is bound.
+          l_data-t_fields = l_data-o_structure->get_components( ).
+          delete l_data-t_fields where type->type_kind ca 'hvrly'.
+          if not l_data-t_fields is initial.
+            try.
+              l_data-o_structure = cl_abap_structdescr=>create( p_components = l_data-t_fields ).
+              catch cx_sy_struct_creation.
+            endtry.
+            if l_data-o_structure is bound.
+              create data l_data-structure type handle l_data-o_structure.
+              if sy-subrc is initial.
+                assign l_data-structure->* to <l_structure>.
+                if <l_structure> is assigned.
+                  move-corresponding i_value to <l_structure>.
+                endif.
+              endif.
+            endif.
+            if <l_structure> is assigned.
+              cl_abap_container_utilities=>fill_container_c( exporting  im_value               = <l_structure>
+                                                             importing  ex_container           = l_data-msg_defaults-context-value
+                                                             exceptions illegal_parameter_type = 1
+                                                                        others                 = 99 ).
+            endif.
+          endif.
+        endif.
+      endif.
+    else.
+      clear: l_data-msg_defaults-detlevel, l_data-msg_defaults-probclass, l_data-msg_defaults-alsort,
+             l_data-msg_defaults-context,  l_data-msg_defaults-params.
+    endif.
+    call function 'BAL_GLB_MSG_DEFAULTS_SET'
+        exporting  i_s_msg_defaults = l_data-msg_defaults
+        exceptions others           = 99.
+  endif.
+
+  call function 'BAL_LOG_MSG_ADD'
+      exporting  i_log_handle        = w_log_handle
+                 i_s_msg             = l_data-message
+      importing  e_s_msg_handle      = l_data-handle
+                 e_msg_was_logged    = l_data-logged
+                 e_msg_was_displayed = l_data-displayed
+      exceptions log_not_found       = 1
+                 msg_inconsistent    = 2
+                 log_is_full         = 3
+                 others              = 99.
+
+
+  free: l_data. clear: l_data.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->ADD_MESSAGE_TABLE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL (default =W_LEVEL)
+* | [--->] I_VALUE                        TYPE        ANY(optional)
+* | [--->] IT_MESSAGES                    TYPE        BAPIRET2_TAB
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method ADD_MESSAGE_TABLE.
+
+field-symbols: <l_message> like line of it_messages.
+
+
+  loop at it_messages assigning <l_message>.
+   add_message( i_type   = <l_message>-type
+                i_level  = i_level
+                i_id     = <l_message>-id
+                i_number = <l_message>-number
+                i_par1   = <l_message>-message_v1
+                i_par2   = <l_message>-message_v2
+                i_par3   = <l_message>-message_v3
+                i_par4   = <l_message>-message_v4
+                i_value  = i_value ).
+  endloop.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->ADD_WARNING
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL (default =W_LEVEL)
+* | [--->] I_ID                           TYPE        BAPIRET2-ID (default =W_ID)
+* | [--->] I_NUMBER                       TYPE        BAPIRET2-NUMBER (default =W_NUMBER)
+* | [--->] I_MESSAGE                      TYPE        ANY(optional)
+* | [--->] I_PAR1                         TYPE        ANY(optional)
+* | [--->] I_PAR2                         TYPE        ANY(optional)
+* | [--->] I_PAR3                         TYPE        ANY(optional)
+* | [--->] I_PAR4                         TYPE        ANY(optional)
+* | [--->] I_VALUE                        TYPE        ANY(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method ADD_WARNING.
+
+  add_message( i_type    = 'W'
+               i_level   = i_level
+               i_id      = i_id
+               i_number  = i_number
+               i_message = i_message
+               i_par1    = i_par1
+               i_par2    = i_par2
+               i_par3    = i_par3
+               i_par4    = i_par4 ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->CONSTRUCTOR
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LOG_OBJECT                   TYPE        BALOBJ_D(optional)
+* | [--->] I_LOG_SUBOBJECT                TYPE        BALSUBOBJ(optional)
+* | [--->] I_LOG_EXTNUMBER                TYPE        ANY(optional)
+* | [--->] I_LOG_NUMBER                   TYPE        BALOGNR(optional)
+* | [--->] I_LOG_HANDLE                   TYPE        BALLOGHNDL(optional)
+* | [--->] I_ID                           TYPE        BAPIRET2-ID(optional)
+* | [--->] I_NUMBER                       TYPE        BAPIRET2-NUMBER(optional)
+* | [--->] I_TYPE                         TYPE        BAPIRET2-TYPE(optional)
+* | [--->] I_LEVEL                        TYPE        BAL_S_MSG-DETLEVEL(optional)
+* | [--->] I_STRUCTURE                    TYPE        BALTABNAME(optional)
+* | [--->] I_ALTERNATE                    TYPE        BOOLE_D(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method CONSTRUCTOR.
+
+
+  w_alternate_log = i_alternate.
+  w_log_object    = i_log_object.
+  w_log_subobject = i_log_subobject.
+  w_log_extnumber = i_log_extnumber.
+
+  if i_id is supplied.
+    w_id        = i_id.
+  endif.
+  if i_number is supplied.
+    w_number    = i_number.
+  endif.
+  if i_type is supplied.
+    w_type      = i_type.
+  endif.
+  if i_level is supplied.
+    w_level     = i_level.
+  endif.
+
+  if i_alternate = abap_false.
+    load( exporting i_log_number    = i_log_number
+                    i_log_handle    = i_log_handle
+                    i_log_extnumber = i_log_extnumber ).
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->DISPLAY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_CONTAINER                    TYPE REF TO CL_GUI_CONTAINER(optional)
+* | [--->] I_AS_POPUP                     TYPE        BOOLE_D(optional)
+* | [--->] I_START_COL                    TYPE        BALCOORD (default =1)
+* | [--->] I_START_ROW                    TYPE        BALCOORD (default =1)
+* | [--->] I_END_COL                      TYPE        BALCOORD (default =120)
+* | [--->] I_END_ROW                      TYPE        BALCOORD (default =20)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method DISPLAY.
+
+data: lt_log_handles   type bal_t_logh,
+      l_control_handle type balcnthndl.
+
+
+  free:  lt_log_handles.
+  clear: lt_log_handles.
+
+  if i_container is bound.
+    call function 'BAL_CNTL_CREATE'
+        exporting  i_container          = i_container
+                   i_s_display_profile  = w_display_profile
+                   i_t_log_handle       = lt_log_handles
+        importing  e_control_handle     = w_control_handle
+        exceptions profile_inconsistent = 1
+                   internal_error       = 2
+                   others               = 99.
+
+  else.
+    if i_as_popup = abap_true.
+      w_display_profile-start_col = i_start_col.
+      w_display_profile-start_row = i_start_row.
+*     w_display_profile-end_col   = i_end_col.
+*     w_display_profile-end_row   = i_end_row.
+    else.
+      clear: w_display_profile-start_col,
+             w_display_profile-start_row,
+             w_display_profile-end_col,
+             w_display_profile-end_row.
+    endif.
+
+    call function 'BAL_DSP_LOG_DISPLAY'
+        exporting  i_s_display_profile = w_display_profile
+        exceptions others              = 99.
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->FREE
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method FREE.
+
+  if not w_control_handle is initial.
+    call function 'BAL_CNTL_FREE'
+         changing   c_control_handle  = w_control_handle
+         exceptions control_not_found = 1
+                    others            = 99.
+  endif.
+  call function 'BAL_LOG_REFRESH'
+      exporting  i_log_handle  = w_log_handle
+      exceptions log_not_found = 1
+                 others        = 99.
+
+  cl_gui_cfw=>flush( ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->GET_DISPLAY_PROFILE
+* +-------------------------------------------------------------------------------------------------+
+* | [<-()] R_DISPLAY_PROFILE              TYPE        BAL_S_PROF
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  method GET_DISPLAY_PROFILE.
+  endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->GET_LOG_NUMBER
+* +-------------------------------------------------------------------------------------------------+
+* | [<-()] R_LOG_NUMBER                   TYPE        BALOGNR
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method GET_LOG_NUMBER.
+
+  if not w_log_number is initial.
+    r_log_number = w_log_number.
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Protected Method /ONS/EASY_LOG->LOAD
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LOG_NUMBER                   TYPE        BALOGNR(optional)
+* | [--->] I_LOG_HANDLE                   TYPE        BALLOGHNDL(optional)
+* | [--->] I_LOG_EXTNUMBER                TYPE        ANY(optional)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method LOAD.
+
+data: begin of l_data,
+        t_log_number type bal_t_logn,
+        t_log_handle type bal_t_logh,
+        log_number   like line of l_data-t_log_number,
+        log_handle   like line of l_data-t_log_handle,
+        log          type bal_s_log,
+      end of l_data.
+
+field-symbols: <l_log_handle> like line of l_data-t_log_handle.
+
+
+  free: l_data. clear: l_data.
+
+  if i_log_number is supplied and not i_log_number is initial.
+    w_log_number      = i_log_number.
+    l_data-log_number = i_log_number.
+    append l_data-log_number to l_data-t_log_number.
+    call function 'BAL_DB_LOAD'
+        exporting  i_t_lognumber      = l_data-t_log_number
+        importing  e_t_log_handle     = l_data-t_log_handle
+        exceptions no_logs_specified  = 1
+                   log_not_found      = 2
+                   log_already_loaded = 3
+                   others             = 99.
+    if sy-subrc is initial.
+      read table l_data-t_log_handle assigning <l_log_handle> index 1.
+      if sy-subrc is initial.
+        w_log_handle = <l_log_handle>.
+      endif.
+    endif.
+  elseif i_log_handle is supplied and not i_log_handle is initial.
+    w_log_handle = i_log_handle.
+  elseif i_log_extnumber is supplied and not i_log_extnumber is initial.
+    select single lognumber from balhdr into w_log_number
+            where object    = w_log_object
+              and subobject = w_log_subobject
+              and extnumber = i_log_extnumber.
+    if sy-subrc is initial and not w_log_number is initial.
+      l_data-log_number = w_log_number.
+      append l_data-log_number to l_data-t_log_number.
+      call function 'BAL_DB_LOAD'
+          exporting  i_t_lognumber      = l_data-t_log_number
+          importing  e_t_log_handle     = l_data-t_log_handle
+          exceptions no_logs_specified  = 1
+                     log_not_found      = 2
+                     log_already_loaded = 3
+                     others             = 99.
+      if sy-subrc is initial.
+        read table l_data-t_log_handle assigning <l_log_handle> index 1.
+        if sy-subrc is initial.
+          w_log_handle = <l_log_handle>.
+        endif.
+      endif.
+    endif.
+  endif.
+  if w_log_handle is initial.
+    l_data-log-extnumber = w_log_extnumber.
+    l_data-log-object    = w_log_object.
+    l_data-log-subobject = w_log_subobject.
+    l_data-log-aldate    = sy-datum.
+    l_data-log-altime    = sy-uzeit.
+    l_data-log-aluser    = sy-uname.
+    l_data-log-altcode   = sy-tcode.
+    l_data-log-alprog    = sy-cprog.
+
+    call function 'BAL_LOG_CREATE'
+        exporting  i_s_log                 = l_data-log
+        importing  e_log_handle            = l_data-log_handle
+        exceptions log_header_inconsistent = 1
+                   others                  = 99.
+    if sy-subrc is initial.
+      w_log_handle = l_data-log_handle.
+    endif.
+  endif.
+
+  start_display_profile( ).
+
+  free: l_data. clear: l_data.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->SAVE
+* +-------------------------------------------------------------------------------------------------+
+* | [<-()] R_LOG_NUMBER                   TYPE        BALOGNR
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method SAVE.
+
+data: begin of l_data,
+        in_update_task type boolean,
+        save_all       type boolean,
+        msg_handle     type balmsghndl,
+        msg            type bal_s_msg,
+        t_log_handle   type bal_t_logh,
+        t_log_number   type bal_t_lgnm,
+        log_handle     like line of l_data-t_log_handle,
+      end of l_data.
+
+field-symbols: <l_log_number> like line of l_data-t_log_number.
+
+
+  free: l_data. clear: l_data.
+
+  l_data-msg_handle-log_handle = w_log_handle.
+  l_data-msg_handle-msgnumber  = '000001'.
+  call function 'BAL_LOG_MSG_READ' exporting  i_s_msg_handle = l_data-msg_handle
+                                   importing  e_s_msg        = l_data-msg
+                                   exceptions log_not_found  = 1
+                                              msg_not_found  = 2
+                                              others         = 99.
+  if sy-subrc is initial and not l_data-msg is initial.
+    l_data-log_handle = w_log_handle.
+    append l_data-log_handle to l_data-t_log_handle.
+    call function 'BAL_DB_SAVE'
+        exporting  i_in_update_task = l_data-in_update_task
+                   i_save_all       = l_data-save_all
+                   i_t_log_handle   = l_data-t_log_handle
+        importing  e_new_lognumbers = l_data-t_log_number
+        exceptions log_not_found    = 1
+                   save_not_allowed = 2
+                   numbering_error  = 3
+                   others           = 99.
+    if sy-subrc is initial.
+      commit work and wait.
+      read table l_data-t_log_number assigning <l_log_number> index 1.
+      if sy-subrc is initial.
+        r_log_number = w_log_number = <l_log_number>-lognumber.
+      else.
+        r_log_number = w_log_number.
+      endif.
+    endif.
+  endif.
+
+  free: l_data. clear: l_data.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->SET_DISPLAY_PROFILE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_DISPLAY_PROFILE              TYPE        BAL_S_PROF
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method SET_DISPLAY_PROFILE.
+
+  clear w_display_profile.
+  call function 'BAL_DSP_PROFILE_DETLEVEL_GET'
+      importing  e_s_display_profile = w_display_profile
+      exceptions others              = 99.
+
+  w_display_profile-use_grid                = abap_true.
+  w_display_profile-bydetlevel              = abap_true.
+  w_display_profile-tree_ontop              = abap_false.
+  w_display_profile-disvariant-report       = sy-repid.
+  w_display_profile-disvariant-handle       = 'LOG'.
+  w_display_profile-grid_title-gridtitle    = ''.
+  w_display_profile-grid_title-no_gridtitle = abap_false.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method /ONS/EASY_LOG->SET_LEVEL_INFO
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_LEVEL                        TYPE        BALLEVEL
+* | [--->] I_STRUCTURE                    TYPE        BALTABNAME
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method SET_LEVEL_INFO.
+
+data: ls_level_info like line of wt_level_info,
+      ls_fcat       like line of ls_level_info-t_fcat,
+      lt_fieldcat   type lvc_t_fcat,
+      l_field(30).
+
+field-symbols: <l_level_info> like line of wt_level_info,
+               <l_fcat>       type bal_t_fcat,
+               <l_fieldcat>   like line of lt_fieldcat.
+
+
+  free:  ls_level_info, ls_fcat, lt_fieldcat.
+  clear: ls_level_info, ls_fcat, lt_fieldcat.
+
+  read table wt_level_info transporting no fields with key detlevel = i_level.
+  if not sy-subrc is initial.
+
+    call function 'LVC_FIELDCATALOG_MERGE'
+        exporting  i_structure_name       = i_structure
+        changing   ct_fieldcat            = lt_fieldcat
+        exceptions inconsistent_interface = 1
+                   program_error          = 2
+                   others                 = 99.
+
+    loop at lt_fieldcat assigning <l_fieldcat>.
+      clear: ls_fcat.
+      move-corresponding <l_fieldcat> to ls_fcat.
+      ls_fcat-ref_field = <l_fieldcat>-fieldname.
+      append ls_fcat to ls_level_info-t_fcat.
+      clear: ls_fcat.
+    endloop.
+
+    ls_level_info-detlevel = i_level.
+    ls_level_info-tabname  = i_structure.
+
+    l_field = 'LEV&_FCAT'.
+    replace '&' with i_level into l_field.
+    assign component l_field of structure w_display_profile to <l_fcat>.
+    if <l_fcat> is assigned.
+      <l_fcat> = ls_level_info-t_fcat.
+    endif.
+
+    append ls_level_info to wt_level_info.
+    sort wt_level_info.
+
+  endif.
+
+  free:  ls_level_info, ls_fcat, lt_fieldcat.
+  clear: ls_level_info, ls_fcat, lt_fieldcat.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method /ONS/EASY_LOG->START_DISPLAY_PROFILE
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method START_DISPLAY_PROFILE.
+
+data: l_fcat like line of w_display_profile-mess_fcat.
+
+
+  clear: w_display_profile.
+  call function 'BAL_DSP_PROFILE_DETLEVEL_GET'
+      importing  e_s_display_profile = w_display_profile
+      exceptions others              = 99.
+
+  w_display_profile-use_grid                = abap_true.
+  w_display_profile-bydetlevel              = abap_true.
+  w_display_profile-tree_ontop              = abap_false.
+  w_display_profile-disvariant-report       = sy-repid.
+  w_display_profile-disvariant-handle       = 'LOG'.
+  w_display_profile-grid_title-gridtitle    = ''.
+  w_display_profile-grid_title-no_gridtitle = abap_false.
+
+*  clear: l_fcat.
+*  l_fcat-ref_table = 'BAL_S_SHOW'.
+*  l_fcat-ref_field = 'T_MSG'.
+*  l_fcat-outputlen = 50.
+*  l_fcat-col_pos   = 1.
+*  append l_fcat to w_display_profile-mess_fcat.
+*  clear: l_fcat.
+
+endmethod.
+ENDCLASS.
